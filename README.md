@@ -28,6 +28,20 @@ The CrewAI Agent Designer is a Cloudera AI application (Launchable AMP) for buil
 
 Reprise walkthrough: [https://[catalog-url]/crewai-agent-designer](https://[catalog-url]/crewai-agent-designer) *(link populated on publish)*
 
+### UI screenshots
+
+**Generate from a prompt** — describe the crew objective; the designer proposes agents, tasks, and wiring.
+
+![Generate flow from prompt](images/FlowFromPrompt.png)
+
+**Generated canvas** — visual crew graph after generation, ready to edit.
+
+![Generated crew flow on canvas](images/GeneratedFlow.png)
+
+**Cloudera Agent Studio** — the same design imported as a CAS workflow.
+
+![Flow imported in Cloudera Agent Studio](images/FlowInCAS.png)
+
 ## Use Case
 
 [comment]: <> (Why: Connects technical components to a business problem. Helps catalog filters and internal reviewers assess industry fit and alignment. Audience: solution architects and customer stakeholders validating relevance.)
@@ -90,7 +104,8 @@ Architecture diagram: see [`assets/cover.png`](assets/cover.png).
 | `catalog-entry.yaml` | Custom / community AMP catalog entry |
 | `requirements.txt` | Runtime Python dependencies |
 | `requirements-dev.txt` | Dev/test dependencies (`pytest`) |
-| `assets/` | Catalog cover and media |
+| `assets/` | Catalog cover (`cover.png`) |
+| `images/` | UI screenshots for the README |
 | `docs/` | Env vars, CML deploy guide, workplaces, YAML notes |
 | `examples/` | Sample crews exported by the designer |
 | `tests/` | Pytest suite |
