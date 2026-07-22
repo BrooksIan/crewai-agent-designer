@@ -1,5 +1,7 @@
 # Cloudera Blueprint: CrewAI Agent Designer
 
+![CrewAI Agent Designer](images/Cover.png)
+
 > A Cloudera AI application that provides a visual designer for [CrewAI](https://docs.crewai.com/) multi-agent systems and exports production-ready `agents.yaml`, `tasks.yaml`, and `crew.py` files. Catalog and website fields live in [`METADATA.yaml`](METADATA.yaml).
 
 ## Table of Contents
