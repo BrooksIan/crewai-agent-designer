@@ -62,6 +62,7 @@ python -m venv .venv
 source .venv/bin/activate
 pip install -r requirements-dev.txt
 pytest
+# or: ./scripts/validate_amp_ready.sh
 streamlit run app/streamlit_app.py
 ```
 
