@@ -1,0 +1,58 @@
+"""{{ tool_name }} — Cloudera Agent Studio custom tool.
+
+Describe what this tool does for the agent. Keep the CAS contract below:
+UserParameters, ToolParameters, run_tool, OUTPUT_KEY, and the __main__ block.
+"""
+
+from typing import Any, Optional
+import argparse
+import json
+
+from pydantic import BaseModel, Field
+
+
+class UserParameters(BaseModel):
+    """Platform configuration parameters (set by the workflow author in CAS)."""
+    dummy_config: Optional[str] = Field(
+        default="",
+        description="Dummy configuration to satisfy the platform's UI parser.",
+    )
+
+
+class ToolParameters(BaseModel):
+    """Tool execution parameters (supplied by the agent at call time)."""
+    dummy_param: Optional[str] = Field(
+        default="",
+        description="Dummy parameter to satisfy the platform's UI parser.",
+    )
+
+
+OUTPUT_KEY = "tool_output"
+
+
+def run_tool(config: UserParameters, args: ToolParameters) -> Any:
+    """Main tool logic. Return a JSON-serializable result for the agent."""
+    # Replace this stub with your implementation.
+    return {
+        "status": "success",
+        "message": "Tool ran successfully.",
+        "config": config.model_dump(),
+        "args": args.model_dump(),
+    }
+
+
+if __name__ == "__main__":
+    """Tool entrypoint — CAS spawns this module as a subprocess."""
+    parser = argparse.ArgumentParser()
+    parser.add_argument("--user-params", required=True, help="Tool configuration")
+    parser.add_argument("--tool-params", required=True, help="Tool arguments")
+    cli_args = parser.parse_args()
+
+    user_dict = json.loads(cli_args.user_params)
+    tool_dict = json.loads(cli_args.tool_params)
+
+    config_obj = UserParameters(**user_dict)
+    params_obj = ToolParameters(**tool_dict)
+
+    output = run_tool(config_obj, params_obj)
+    print(OUTPUT_KEY, json.dumps(output))

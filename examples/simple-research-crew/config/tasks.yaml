@@ -1,0 +1,13 @@
+research:
+  description: >-
+    Investigate {topic} using the tools available.
+  expected_output: >-
+    A markdown list of 5–10 findings with sources.
+  agent: researcher
+write_brief:
+  description: >-
+    Turn the research notes into a two-paragraph brief on {topic}.
+  expected_output: >-
+    Two paragraphs. No headings. Max 300 words.
+  agent: writer
+  markdown: true

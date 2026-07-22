@@ -1,0 +1,76 @@
+name: CrewAI Agent Designer
+description: >
+  Visually design CrewAI agents, tasks, and crews on Cloudera AI. Export
+  production-ready agents.yaml, tasks.yaml, and crew.py — or a Cloudera
+  Agent Studio workflow bundle.
+author: Cloudera
+specification_version: 1.0
+prototype_version: 1.0
+date: "2026-07-22"
+
+environment_variables:
+  CDP_INFERENCE_ENDPOINT:
+    default: ""
+    description: >
+      OpenAI-compatible endpoint URL for Cloudera AI Inference Service.
+      Leave empty to use OpenAI or Anthropic instead. Assist/Generate work
+      without an LLM; configure one to enable AI drafting.
+    required: false
+  CDP_INFERENCE_API_KEY:
+    default: ""
+    description: API key / bearer token for Cloudera AI Inference.
+    required: false
+  CDP_INFERENCE_MODEL:
+    default: "meta-llama-3-1-70b-instruct"
+    description: Model ID served on the Cloudera AI Inference endpoint.
+    required: false
+  OPENAI_API_KEY:
+    default: ""
+    description: OpenAI API key. Used if Cloudera Inference is not configured.
+    required: false
+  OPENAI_BASE_URL:
+    default: "https://api.openai.com/v1"
+    description: OpenAI-compatible base URL (e.g. a local vLLM).
+    required: false
+  OPENAI_MODEL:
+    default: "gpt-4o-mini"
+    description: Model ID for the OpenAI-compatible backend.
+    required: false
+  ANTHROPIC_API_KEY:
+    default: ""
+    description: Anthropic API key. Used if neither Cloudera nor OpenAI is set.
+    required: false
+  ANTHROPIC_MODEL:
+    default: "claude-opus-4-8"
+    description: Anthropic model ID.
+    required: false
+
+runtimes:
+  - editor: JupyterLab
+    kernel: Python 3.11
+    edition: Standard
+
+tasks:
+  - type: run_session
+    name: Install dependencies
+    script: 0_session-install-dependencies/install_dependencies.py
+    short_summary: Install Python dependencies for the Agent Designer.
+    kernel: python3
+    cpu: 2
+    memory: 8
+
+  - type: start_application
+    name: CrewAI Agent Designer
+    subdomain: crewai-designer
+    script: 1_app-crewai-designer/launch_app.py
+    kernel: python3
+    short_summary: Launch the Streamlit designer.
+    long_summary: >
+      Long-running Streamlit application. Opens on the workspace's application
+      port. Use the sidebar to switch languages, pick an LLM backend, and
+      manage saved designs. LLM env vars are optional — the designer works
+      without Assist/Generate until a backend is configured.
+    cpu: 2
+    memory: 8
+    environment_variables:
+      TASK_TYPE: START_APPLICATION

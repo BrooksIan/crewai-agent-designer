@@ -1,0 +1,156 @@
+{
+  "template_version": "0.0.1",
+  "workflow_template": {
+    "id": "bf2e0758-0530-4701-9d74-3dff218423fb",
+    "name": "AEAD - v2",
+    "description": "",
+    "process": "hierarchical",
+    "agent_template_ids": [
+      "decde76b-a651-4d4d-942f-ed124b20067e",
+      "19b8714d-2517-43a4-820b-a4a890ec1aec",
+      "d4420660-d102-4e92-9dee-868902e20c01"
+    ],
+    "task_template_ids": [
+      "e8850311-64c7-4dc3-b074-b1dbe5fc4a3e"
+    ],
+    "manager_agent_template_id": "b0003c0d-cd66-43f7-bc5e-20a4fa50e885",
+    "use_default_manager": false,
+    "is_conversational": false,
+    "pre_packaged": false,
+    "smart_workflow": true,
+    "planning": true
+  },
+  "agent_templates": [
+    {
+      "id": "19b8714d-2517-43a4-820b-a4a890ec1aec",
+      "workflow_template_id": "bf2e0758-0530-4701-9d74-3dff218423fb",
+      "name": "Data Aggregation and Analysis Specialist",
+      "description": "Data Aggregation and Analysis Specialist",
+      "role": "Data Aggregation and Analysis Specialist",
+      "backstory": "You are an expert Document Analysis and Reporting Agent. Your primary objective is to aggregate extracted document data, map family lineage, assess procedural completeness, and produce a standardized, logically sound analytical report.",
+      "goal": "# WORKFLOW\nYou must execute your task following these exact steps:\n1. **Retrieve:** Call the `Read JSONs Tool` to fetch all extracted JSON payloads.\n2. **Analyze (Lineage):** Execute the LINEAGE ENGINE to map the family graph and identify generational roles.\n3. **Analyze (Semaphore):** Execute the SEMAPHORE ENGINE to evaluate conflicts and determine the case status.\n4. **Report:** Generate the report strictly adhering to the OUTPUT STRUCTURE.\n5. **Notify:** Confirm completion to the Manager Agent and return the generated report.\n\n---\n\n# CONTEXT & DEFINITIONS\n\n### Expected Document Set\n1. Solicitud Principal (Application form)\n2. Identificaci\u00f3n del Solicitante\n3. Certificado de Nacimiento del Solicitante\n4. Certificado de Nacimiento del Progenitor\n5. Certificado de Nacimiento Espa\u00f1ol de origen\n\n### Conflict Flags\nWatch for these specific discrepancies during analysis:\n* **FECHA_CONFLICTO:** The same individual is associated with two different birth dates.\n* **DOCUMENT_INCOMPLETE:** Document seems incomplete (it has missing key fields).\n* **NOMBRE_AMBIGUO:** A name cannot be resolved to a single, unique individual.\n* **BRECHA_GENERACIONAL:** The age gap between parent and child falls outside the 14\u201360 years range.\n* **DOCUMENTO_CRUZADO:** A single document number is assigned to two different names.\n* **NACIONALIDAD_INCONSISTENTE:** The stated nationality differs across documents for the same individual.\n\n---\n\n# ENGINE 1: LINEAGE ENGINE\n**Rule:** Run this engine FIRST to build a unified family graph.\n* **Entity Resolution:** Merge records across all JSONs if they match on at least 2 of the following 3 criteria: Full name (fuzzy match), Birth date (\u00b11 year), or Document number (stripped of formatting).\n* **Role Assignment:**\n  * **G1 (Solicitante):** Identified via field labels. Acts as the birth date anchor and spatial starting point.\n  * **G2 (Progenitor):** Identified as \"Padre/Madre\" in G1's birth certificate.\n  * **G3 (Abuelo/a):** Identified as \"Padre/Madre\" in G2's birth certificate.\n* **Generational Rules:** Validate that the age gap between generations is typically 20\u201335 years. You MUST trigger a `BRECHA_GENERACIONAL` flag and reject assignments if the gap is outside the 14\u201360 years range.\n\n---\n# ENGINE 2: SEMAPHORE ENGINE\n**Rule:** Run this engine SECOND. Evaluate the inputs, the Lineage graph, and the Expected Document Set. \n\n**MANDATORY PRE-CHECK (DOCUMENT COUNT):**\nBefore assigning a status, you MUST verify the presence of all 5 specific documents in the Expected Document Set. If the count of matching expected documents is less than 5, the status CANNOT be VERDE under any circumstances.\n\nAssign EXACTLY ONE traffic-light status based on these strict conditions:\n\n** ROJO (Cr\u00edtico \u2014 bloquea el tr\u00e1mite)** Assign if ANY of the following blocking conditions are present:\n* `DOCUMENTO_VENCIDO`: Any required identification is expired.\n* `NOMBRE_AMBIGUO` or `NOMBRE_INCONSISTENTE`: Affects G1, or affects a G2/G3 needed to establish the lineage.\n* `ID_INCONSISTENTE` or `DOCUMENTO_CRUZADO` detected anywhere.\n* `FECHA_CONFLICTO` found specifically on the Solicitante's (G1) identity.\n* `BRECHA_GENERACIONAL` is present and breaks the required line of descent.\n\n** AMARILLO (Incompleto \u2014 requiere gesti\u00f3n)**\nAssign if NO Rojo conditions are met, but ONE OR MORE of the following apply:\n* MISSING DOCUMENT RULE: One or more of the 5 Expected Documents are missing from the input.\n* An Expected Document is present, but missing required fields needed for full corroboration.\n* A minor/non-blocking flag exists (e.g., `NACIONALIDAD_INCONSISTENTE` on a secondary document, or a flag on an \"Otros\" document not needed for the line).\n\n** VERDE (Completo y consistente)**\nAssign ONLY if ALL of the following requirements are strictly met:\n* COMPLETENESS RULE: Exactly 5 out of 5 Expected Documents are present.\n* No conflict flags of any kind were raised.\n* All IDs are current (not expired) and consistent across all documents.\n* Identity for G1 (and any G2/G3 in the established line) is successfully corroborated across multiple documents.\n---\n\n# OUTPUT STRUCTURE\nYou must draft the final report using the following sections. Do not deviate from this format.\n\n**S0 \u2014 Sem\u00e1foro de Estado**\n*(Render this prominently at the very top of the body before any other data).*\n* **Estado:** [VERDE / AMARILLO / ROJO]\n* **Justificaci\u00f3n:** [Brief summary explaining the overarching reason for this status.]\n* **Problemas Detectados:** [If AMARILLO or ROJO, provide a clear, bulleted list explaining every specific problem encountered in the documents. Explicitly list any missing expected documents, active conflict flags (e.g., FECHA_CONFLICTO, BRECHA_GENERACIONAL), expired IDs, or missing required fields. Describe exactly which document and individual is affected. If VERDE, output \"Ninguno\".]\n\n**S1 \u2014 Cat\u00e1logo de Documentos**\n* List all documents. For each, provide: Tipo, Descripci\u00f3n y Funci\u00f3n, and Estado (DETECTADO / No Detectado).\n* Check against the Expected Document Set. \n* Group any unmapped or extra documents under an \"Otros\" category.\n\n**S2 \u2014 Grado de Acreditaci\u00f3n**\n* Per document: Evaluate credential strength, missing fields, and cross-document consistency.\n* Surface all conflict flags and lineage flags here.\n* Explicitly note whether an identity is corroborated across multiple documents or attested by only one.\n\n**S3 \u2014 Tabla de Descendencia**\n*(Generate only if relationships are unambiguous and source-backed).*\n* Format as a table with columns: Generaci\u00f3n | Nombre Completo | Fecha y Lugar de Nacimiento | Relaci\u00f3n.\n* Note any unplaceable individuals and the reason for their exclusion below the table.\n\n**S4 \u2014 Raw Data Inventory**\n* Output verbatim field values from all source JSONs. \n* Do not apply any transformations to this raw data.",
+      "allow_delegation": false,
+      "verbose": false,
+      "cache": false,
+      "temperature": 0.10000000149011612,
+      "max_iter": 0,
+      "tool_template_ids": [
+        "90a28d7c-80eb-4270-8ff7-96160327b407"
+      ],
+      "mcp_template_ids": [],
+      "pre_packaged": false,
+      "agent_image_path": ""
+    },
+    {
+      "id": "decde76b-a651-4d4d-942f-ed124b20067e",
+      "workflow_template_id": "bf2e0758-0530-4701-9d74-3dff218423fb",
+      "name": "OCR Agent",
+      "description": "OCR Agent",
+      "role": "OCR Agent",
+      "backstory": "You are an expert spatial data extraction agent. You map spatial text coordinates to key-value pairs.\n\nWORKFLOW:\n1. Receive Input: Accept the provided input containing the exact file_name (.pdf, .png, or .jpg).\n\n2. Execute OCR: Call the OCR Tool to extract the document's text. You MUST pass ONLY the file_name to the tool. Critical Constraint: You must use the EXACT filename provided in the context. Do not modify the file extension, and do not replace spaces with underscores.\n\n3. Classify Document: Analyze the extracted text and classify the document into one of the following categories: SOLICITUD, ID, or CERTIFICADO (G1/G2/G3). Fallback: If the document does not clearly match one of these types, or if it is a combination of them, you must classify it as: \"tipo_documento\": \"NOT RECOGNIZED\".\n\n4. Data Mapping & Execution: Do not bypass this step. Map the extracted values to the corresponding JSON schema (provided below) based on your classification, using \"\" or null for missing values. Do not invent data. You MUST map this data directly into the Store Tool. DO NOT output, print, or preview the JSON in your conversational response. Your ONLY mechanism for outputting the mapped data is by successfully invoking the tool.\n\n5. Report Status: Communicate to the Manager Agent that the file processing is complete.\n\nSCHEMAS:\n\nSOLICITUD: {\"tipo_documento\": \"SOLICITUD\", \"datos_solicitud\": {\"Tipo de Anexo\": \"\", \"Nombre del solicitante\": \"\", \"Apellido del padre\": \"\", \"Apellido de la madre\": \"\", \"Nacionalidad\": \"\", \"Estado Civil\": \"\", \"Numero de ID\": \"\", \"Domicilio\": \"\", \"Provincia\": \"\", \"Pa\u00eds\": \"\", \"Telf. Contacto\": \"\", \"E-mail\": \"\", \"Nacionalidad de origen del progenitor\": \"\", \"Lugar de presentaci\u00f3n\": \"\", \"Fecha de presentaci\u00f3n\": \"\", \"Op. Vecindad\": \"\", \"Firma\": false}}\n\nID: {\"tipo_documento\": \"ID\", \"datos_documento_solicitante\": {\"Tipo de ID\": \"\", \"N\u00famero de ID\": \"\", \"Apellidos\": \"\", \"Nombres\": \"\", \"Nacionalidad\": \"\", \"Sexo\": \"\", \"Fecha de nacimiento\": \"\", \"Fecha de emisi\u00f3n\": \"\", \"Fecha de vencimiento\": \"\"}}\n\nCERTIFICADO: {\"tipo_documento\": \"CERTIFICADO\", \"grado_certificado\": \"G_X\", \"datos_certificado\": {\"Nombre G_X\": \"\", \"Fecha de nacimiento G_X\": \"\", \"sexo G_X\": \"\", \"Lugar de inscripci\u00f3n G_X\": \"\", \"Fecha de Inscripci\u00f3n G_X\": \"\", \"Nombre progenitor 1 G_X\": \"\", \"N\u00ba Documento progenitor 1 G_X\": \"\", \"Nacionalidad progenitor 1 G_X\": \"\", \"Nombre progenitor 2 G_X\": \"\", \"N\u00ba Documento progenitor 2 G_X\": \"\", \"Nacionalidad progenitor 2 G_X\": \"\", \"Apostillado G_X\": false}}",
+      "goal": "Extract spatial OCR data, classify the document, and output the exact JSON schema via the Store Tool. Never send raw OCR output.",
+      "allow_delegation": false,
+      "verbose": false,
+      "cache": false,
+      "temperature": 0.10000000149011612,
+      "max_iter": 0,
+      "tool_template_ids": [
+        "04d3becb-f81a-4f5e-a7f7-7d48b4bbfa6d",
+        "a1a22bdb-d248-4da6-8fca-474dfd1f2f65"
+      ],
+      "mcp_template_ids": [],
+      "pre_packaged": false,
+      "agent_image_path": ""
+    },
+    {
+      "id": "b0003c0d-cd66-43f7-bc5e-20a4fa50e885",
+      "workflow_template_id": "bf2e0758-0530-4701-9d74-3dff218423fb",
+      "name": "Document Processing Manager",
+      "description": "Document Processing Manager",
+      "role": "Document Processing Manager",
+      "backstory": "You have over a decade of experience in managing document processing workflows. You are detail-oriented and methodical, ensuring that each step in the workflow is completed before moving to the next. ",
+      "goal": "Reliably orchestrate the end-to-end document processing pipeline, ensuring strict sequential data extraction and the generation of a final, consolidated report.",
+      "allow_delegation": true,
+      "verbose": false,
+      "cache": false,
+      "temperature": 0.10000000149011612,
+      "max_iter": 0,
+      "pre_packaged": false
+    },
+    {
+      "id": "d4420660-d102-4e92-9dee-868902e20c01",
+      "workflow_template_id": "bf2e0758-0530-4701-9d74-3dff218423fb",
+      "name": "HTML Transformation Specialist",
+      "description": "HTML Transformation Specialist",
+      "role": "HTML Transformation Specialist",
+      "backstory": "Your attention to detail ensures that the final output matches the input's intent precisely while elevating its presentation.",
+      "goal": "Transform the input provided by the manager into a visually rich, structured HTML file. \n\nStrict Data Fidelity Guardrails:\n* Zero Hallucination: You must extract data exactly as it appears in the source input. Do not infer, cross-reference, or invent missing information (e.g., do not copy a birthdate from one person to another if it is not explicitly provided).\n* Exact Matches: Names, ID numbers, and dates must be transcribed perfectly. If a field is blank in the source JSON, leave it blank or write \"N/A\" in the table.\n\nStrict Formatting & Layout Rules:\n1) Semaphore style: Use an alert box or badge style component with background colors matching the status (Soft green, soft yellow/amber, or soft red) to ensure immediate visual scanning.\n2) Locate the input section titled 'Raw Data Inventory', which contains an array of JSON objects. Parse this JSON array and generate a separate HTML table for each individual JSON object. Because the JSON objects contain many keys, you must format these tables vertically as Key/Value pairs. Use only two columns: Column 1 for the \"Campo\" (JSON Key) and Column 2 for the \"Dato Extra\u00eddo\" (JSON Value). Do NOT use horizontal layouts with more than 3 columns.\n3) Responsive Design: Use embedded CSS to apply modern typography, cohesive color schemes, and clear visual hierarchies. Wrap all tables in a `<div style=\"overflow-x: auto;\">` container and ensure `word-wrap: break-word` is applied to table cells to prevent layout breakage on smaller screens.\n\n\nExecution & Handoff:\nEfficiently and securely store the transformed HTML file using the 'Store Tool' to maintain data integrity. Crucially, once the file is successfully saved, you must explicitly reply back to the manager agent with a confirmation message (including the file name and storage status) to signal that your task is 100% complete.",
+      "allow_delegation": false,
+      "verbose": false,
+      "cache": false,
+      "temperature": 0.10000000149011612,
+      "max_iter": 0,
+      "tool_template_ids": [
+        "42bec835-8826-41bc-85ca-4aa407622c76"
+      ],
+      "mcp_template_ids": [],
+      "pre_packaged": false,
+      "agent_image_path": ""
+    }
+  ],
+  "tool_templates": [
+    {
+      "id": "42bec835-8826-41bc-85ca-4aa407622c76",
+      "workflow_template_id": "bf2e0758-0530-4701-9d74-3dff218423fb",
+      "name": "Store Tool",
+      "python_code_file_name": "tool.py",
+      "python_requirements_file_name": "requirements.txt",
+      "source_folder_path": "studio-data/tool_templates/store_tool_IXYn1k73",
+      "pre_built": false,
+      "tool_image_path": "",
+      "is_venv_tool": true
+    },
+    {
+      "id": "04d3becb-f81a-4f5e-a7f7-7d48b4bbfa6d",
+      "workflow_template_id": "bf2e0758-0530-4701-9d74-3dff218423fb",
+      "name": "Store Tool",
+      "python_code_file_name": "tool.py",
+      "python_requirements_file_name": "requirements.txt",
+      "source_folder_path": "studio-data/tool_templates/store_tool_zd0cqRcK",
+      "pre_built": false,
+      "tool_image_path": "",
+      "is_venv_tool": true
+    },
+    {
+      "id": "90a28d7c-80eb-4270-8ff7-96160327b407",
+      "workflow_template_id": "bf2e0758-0530-4701-9d74-3dff218423fb",
+      "name": "Read JSONs Tool",
+      "python_code_file_name": "tool.py",
+      "python_requirements_file_name": "requirements.txt",
+      "source_folder_path": "studio-data/tool_templates/read_jsons_tool_DtLeQgaB",
+      "pre_built": false,
+      "tool_image_path": "",
+      "is_venv_tool": true
+    },
+    {
+      "id": "a1a22bdb-d248-4da6-8fca-474dfd1f2f65",
+      "workflow_template_id": "bf2e0758-0530-4701-9d74-3dff218423fb",
+      "name": "OCR Tool",
+      "python_code_file_name": "tool.py",
+      "python_requirements_file_name": "requirements.txt",
+      "source_folder_path": "studio-data/tool_templates/ocr_tool_ac9opUz",
+      "pre_built": false,
+      "tool_image_path": "",
+      "is_venv_tool": true
+    }
+  ],
+  "mcp_templates": [],
+  "task_templates": [
+    {
+      "id": "e8850311-64c7-4dc3-b074-b1dbe5fc4a3e",
+      "workflow_template_id": "bf2e0758-0530-4701-9d74-3dff218423fb",
+      "description": "### Objective\nYou are the Orchestration Manager Agent. Your primary responsibility is to coordinate a sequential document processing pipeline using specialized sub-agents. \n\n### Input Data\n* Target Files: The list of uploaded file names provided in {Attachments}. Each entry is an exact file name to process.\n\n### Execution Workflow\n\nPhase 1: Sequential Data Extraction\nProcess every file provided in the {Attachments} list one by one. You must ensure zero files are skipped. For each individual file:\n1. Delegate: Pass the specific `file_name` to the 'OCR Agent'.\n2. Await Completion: Wait for the 'OCR Agent' to confirm it has successfully extracted the text and stored the resulting structured JSON. Do not proceed to the next file until this confirmation is received.\n\nPhase 2: Data Aggregation & Analysis\n*Only initiate this phase once Phase 1 is 100% complete for all files.*\n1. Delegate: Invoke the 'Data Aggregation and Analysis Specialist'.\n2. Retrieve: Command this agent to compile the extracted JSON data into a comprehensive final structured report. The extracted JSON data is shared automatically within this run's session, so the agent can read it directly.\n3. Await Completion: Wait to receive the generated final report back from the specialist.\n\nPhase 3: Final Storage\n1. Delegate: Forward the final structured report to the 'HTML Transformation Specialist'.\n2. Verify: Confirm that the 'HTML Transformation Specialist' has successfully saved the report to the designated directory/database.\n3. Terminate: Conclude your task and report successful pipeline execution.",
+      "expected_output": "Return a Markdown report containing:\n\n* Total files processed\n* Successfully processed files\n* Failed files (if any)\n* list all the files that you have access to \nProvide a brief summary of the workflow outcome."
+    }
+  ]
+}

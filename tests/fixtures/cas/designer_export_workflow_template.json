@@ -1,0 +1,97 @@
+{
+  "template_version": "0.0.1",
+  "workflow_template": {
+    "id": "c0abc0de-1234-5678-9abc-def012345678",
+    "name": "ResearchCrew",
+    "description": "ResearchCrew \u2014 2 task(s) exported from the CrewAI Agent Designer.",
+    "process": "hierarchical",
+    "agent_template_ids": [
+      "b9e9f1b0-01eb-5e2b-a741-f736ab04c43c",
+      "02116c5f-bf1d-5414-9d24-57ec74ca0cdd"
+    ],
+    "task_template_ids": [
+      "3080115e-b5e6-5c81-8e0d-b6b8f7041b4a"
+    ],
+    "manager_agent_template_id": "239e0f27-c80d-56a8-bc83-fc41da3796a7",
+    "use_default_manager": false,
+    "is_conversational": true,
+    "pre_packaged": false,
+    "smart_workflow": true,
+    "planning": true
+  },
+  "agent_templates": [
+    {
+      "agent_image_path": "",
+      "allow_delegation": false,
+      "backstory": "A veteran researcher with a knack for cutting through noise. Reads sources deeply and cites everything.",
+      "cache": true,
+      "description": "Senior Researcher",
+      "goal": "Find and summarize recent developments on {topic}.",
+      "id": "b9e9f1b0-01eb-5e2b-a741-f736ab04c43c",
+      "max_iter": 20,
+      "name": "researcher",
+      "pre_packaged": false,
+      "role": "Senior Researcher",
+      "temperature": 0.1,
+      "tool_template_ids": [
+        "10c4cc90-ec60-547f-a911-6fe9ba89e64a"
+      ],
+      "verbose": false,
+      "workflow_template_id": "c0abc0de-1234-5678-9abc-def012345678"
+    },
+    {
+      "agent_image_path": "",
+      "allow_delegation": false,
+      "backstory": "A former newsroom editor. Fewer adjectives, more nouns.",
+      "cache": true,
+      "description": "Technical Writer",
+      "goal": "Turn research notes into a crisp brief on {topic}.",
+      "id": "02116c5f-bf1d-5414-9d24-57ec74ca0cdd",
+      "max_iter": 20,
+      "name": "writer",
+      "pre_packaged": false,
+      "role": "Technical Writer",
+      "temperature": 0.1,
+      "tool_template_ids": [],
+      "verbose": true,
+      "workflow_template_id": "c0abc0de-1234-5678-9abc-def012345678"
+    },
+    {
+      "allow_delegation": true,
+      "backstory": "You orchestrate the specialists on this workflow. If the user's request is purely conversational (greeting, thanks, small talk, follow-ups, clarifications, meta questions) and does not require tool use, respond directly based on the conversation history. Otherwise, delegate to the specialist agent best suited to the task and synthesize their outputs into a concise, evidence-backed final answer for the user.",
+      "cache": false,
+      "description": "Autonomous manager for this workflow",
+      "goal": "Route each user request to the right specialist and return a coherent final answer.",
+      "id": "239e0f27-c80d-56a8-bc83-fc41da3796a7",
+      "max_iter": 0,
+      "name": "Workflow Manager",
+      "pre_packaged": false,
+      "role": "Autonomous Workflow Manager",
+      "temperature": 0.1,
+      "verbose": false,
+      "workflow_template_id": "c0abc0de-1234-5678-9abc-def012345678"
+    }
+  ],
+  "tool_templates": [
+    {
+      "id": "10c4cc90-ec60-547f-a911-6fe9ba89e64a",
+      "is_venv_tool": true,
+      "name": "Web Search (Serper.dev)",
+      "pre_built": false,
+      "python_code_file_name": "tool.py",
+      "python_requirements_file_name": "requirements.txt",
+      "source_folder_path": "studio-data/tool_templates/web_search_2a719626",
+      "tool_image_path": "studio-data/dynamic_assets/tool_template_icons/web_search_2a719626_icon.png",
+      "workflow_template_id": "c0abc0de-1234-5678-9abc-def012345678"
+    }
+  ],
+  "mcp_templates": [],
+  "task_templates": [
+    {
+      "description": "Workflow: ResearchCrew.\n\nTasks to perform, in order:\n1. research (delegate to: researcher): Investigate {topic} using the tools available.\n   Expected output: A markdown list of 5\u201310 findings with sources.\n2. write_brief (delegate to: writer): Turn the research notes into a two-paragraph brief on {topic}.\n   Expected output: Two paragraphs. No headings. Max 300 words.\n\nRespond to the user's message: '{user_input}'. Conversation history:\n{context}.",
+      "expected_output": "research: A markdown list of 5\u201310 findings with sources.; write_brief: Two paragraphs. No headings. Max 300 words.",
+      "id": "3080115e-b5e6-5c81-8e0d-b6b8f7041b4a",
+      "workflow_template_id": "c0abc0de-1234-5678-9abc-def012345678"
+    }
+  ]
+}

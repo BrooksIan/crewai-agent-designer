@@ -1,0 +1,35 @@
+# Python
+.venv/
+venv/
+__pycache__/
+*.py[cod]
+*$py.class
+*.egg-info/
+.eggs/
+dist/
+build/
+
+# Test / tooling
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.coverage
+htmlcov/
+
+# OS / editor
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/
+
+# Local Streamlit
+.streamlit/secrets.toml
+
+# User-generated designs (keep directory via .gitkeep)
+designs/*.json
+workplaces/*.json
+
+# Scratch / unpack artifacts
+ClouderaAgentStudioeamples/
+_unpacked_*/
+workflow_template_*.zip

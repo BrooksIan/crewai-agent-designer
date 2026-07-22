@@ -1,0 +1,21 @@
+{
+  "template_version": "0.0.1",
+  "workflow_template": {
+    "id": {{ workflow.id | tojson }},
+    "name": {{ workflow.name | tojson }},
+    "description": {{ workflow.description | tojson }},
+    "process": {{ workflow.process | tojson }},
+    "agent_template_ids": {{ workflow.agent_template_ids | tojson }},
+    "task_template_ids": {{ workflow.task_template_ids | tojson }},
+    "manager_agent_template_id": {{ workflow.manager_agent_template_id | tojson }},
+    "use_default_manager": {{ workflow.use_default_manager | tojson }},
+    "is_conversational": {{ workflow.is_conversational | tojson }},
+    "pre_packaged": {{ workflow.pre_packaged | tojson }},
+    "smart_workflow": {{ workflow.smart_workflow | tojson }},
+    "planning": {{ workflow.planning | tojson }}
+  },
+  "agent_templates": {{ agent_templates | tojson }},
+  "tool_templates": {{ tool_templates | tojson }},
+  "mcp_templates": [],
+  "task_templates": {{ task_templates | tojson }}
+}

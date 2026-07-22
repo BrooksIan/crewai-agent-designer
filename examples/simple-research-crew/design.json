@@ -1,0 +1,89 @@
+{
+  "version": 1,
+  "agents": [
+    {
+      "name": "researcher",
+      "role": "Senior Researcher",
+      "goal": "Find and summarize recent developments on {topic}.",
+      "backstory": "A veteran researcher with a knack for cutting through noise. Reads sources deeply and cites everything.",
+      "llm": null,
+      "tools": [
+        "web_search"
+      ],
+      "max_iter": 20,
+      "max_rpm": null,
+      "verbose": false,
+      "allow_delegation": false,
+      "reasoning": false,
+      "multimodal": false,
+      "respect_context_window": true,
+      "max_retry_limit": 2,
+      "inject_date": false,
+      "date_format": "%Y-%m-%d"
+    },
+    {
+      "name": "writer",
+      "role": "Technical Writer",
+      "goal": "Turn research notes into a crisp brief on {topic}.",
+      "backstory": "A former newsroom editor. Fewer adjectives, more nouns.",
+      "llm": null,
+      "tools": [],
+      "max_iter": 20,
+      "max_rpm": null,
+      "verbose": true,
+      "allow_delegation": false,
+      "reasoning": false,
+      "multimodal": false,
+      "respect_context_window": true,
+      "max_retry_limit": 2,
+      "inject_date": false,
+      "date_format": "%Y-%m-%d"
+    }
+  ],
+  "tasks": [
+    {
+      "name": "research",
+      "description": "Investigate {topic} using the tools available.",
+      "expected_output": "A markdown list of 5–10 findings with sources.",
+      "agent": "researcher",
+      "tools": [
+        "web_search"
+      ],
+      "context": [],
+      "async_execution": false,
+      "human_input": false,
+      "markdown": false,
+      "output_file": null
+    },
+    {
+      "name": "write_brief",
+      "description": "Turn the research notes into a two-paragraph brief on {topic}.",
+      "expected_output": "Two paragraphs. No headings. Max 300 words.",
+      "agent": "writer",
+      "tools": [],
+      "context": [
+        "research"
+      ],
+      "async_execution": false,
+      "human_input": false,
+      "markdown": true,
+      "output_file": null
+    }
+  ],
+  "tools": [
+    {
+      "name": "web_search",
+      "kind": "SerperDevTool",
+      "params": {}
+    }
+  ],
+  "crew": {
+    "name": "ResearchCrew",
+    "process": "sequential",
+    "verbose": true,
+    "memory": false,
+    "cache": true,
+    "manager_llm": null,
+    "task_order": []
+  }
+}
