@@ -27,7 +27,7 @@ entries:
       optional OpenAI-compatible and Anthropic backends. LLM configuration
       is optional; the visual editor works without it.</p>
     image_path: >-
-      https://raw.githubusercontent.com/cloudera/crewai-agent-designer/main/assets/cover.png
+      https://raw.githubusercontent.com/BrooksIan/crewai-agent-designer/main/assets/cover.png
     tags:
       - crewai
       - agents
@@ -35,7 +35,7 @@ entries:
       - streamlit
       - yaml
       - agent-studio
-    git_url: 'https://github.com/cloudera/crewai-agent-designer'
+    git_url: 'https://github.com/BrooksIan/crewai-agent-designer'
     is_prototype: true
     is_community: true
     is_new: true

@@ -42,7 +42,7 @@ publisher: cloudera                            # cloudera | partner-name
 source: Internal                               # Internal | Partner | NVIDIA Adaptation | Customer
 
 # --- Repository & assets ---
-public_github_link: "https://github.com/cloudera/crewai-agent-designer"
+public_github_link: "https://github.com/BrooksIan/crewai-agent-designer"
 #private_github_link: ""                       # If applicable, original repo during development
 
 # --- Ownership ---
